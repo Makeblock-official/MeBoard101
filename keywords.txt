@@ -1,0 +1,48 @@
+#######################################
+# Syntax Coloring Map For MeBoard101
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+MeBoard101	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+MeUltrasonicSensor	KEYWORD2
+Me7SegmentDisplay	KEYWORD2
+MeDCMotor	KEYWORD2
+MeEncoderMotor	KEYWORD2
+MeStepper	KEYWORD2
+MeFlameSensor	KEYWORD2
+MeGasSensor	KEYWORD2
+MeHostParser	KEYWORD2
+MeInfraredReceiver	KEYWORD2
+MeJoystick	KEYWORD2
+MeLEDMatrix	KEYWORD2
+MeLightSensor	KEYWORD2
+MeLimitSwitch	KEYWORD2
+MeLineFollower	KEYWORD2
+MePIRMotionSensor	KEYWORD2
+MePotentiometer	KEYWORD2
+MePressureSensor	KEYWORD2
+MeRGBLed	KEYWORD2
+MeShutter	KEYWORD2
+MeSoundSensor	KEYWORD2
+MeTouchSensor	KEYWORD2
+run	KEYWORD2
+stop	KEYWORD2
+show	KEYWORD2
+display	KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+
+#######################################
+# Constants (LITERAL1)
+#######################################

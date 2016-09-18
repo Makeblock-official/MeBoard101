@@ -12,7 +12,6 @@ MeDCMotor dc;
 Servo servos[8];
 MeRGBLed led;
 
-MeTemperature ts;
 MeUltrasonicSensor us;
 Me7SegmentDisplay seg;
 MePort generalDevice;
@@ -22,6 +21,7 @@ MeFlameSensor FlameSensor;
 MeGasSensor GasSensor;
 MeTouchSensor touchSensor;
 MeLEDMatrix ledMx;
+Me4Button buttonSensor;
 typedef struct MeModule
 {
     int device;
@@ -121,6 +121,7 @@ int receivedBufferLength = 0;
 bool isReceiving = false;
 void setup() {
   Serial.begin(115200);
+  Serial1.begin(115200);
   while (!Serial);   
   CurieIMU.begin();
   
@@ -146,6 +147,7 @@ void setup() {
 bool isNotify = false;
 void loop() {
   
+  keyPressed = buttonSensor.pressed();
   blePeripheral.poll();
   BLECentral central = blePeripheral.central();
   if (central) {
@@ -165,6 +167,9 @@ void loop() {
   }
   if(Serial.available()){
     parseBleData(Serial.read());
+  }
+  if(Serial1.available()){
+    parseBleData(Serial1.read());
   }
 }
 void parseBleData(unsigned char c){
@@ -218,6 +223,7 @@ void appendBle(unsigned char c){
   bleBuffer[bleBufferIndex] = c;
   bleBufferIndex++;
   Serial.write(c);
+  Serial1.write(c);
 }
 void mBotCharacteristicWritten(BLECentral& central, BLECharacteristic& characteristic) {
   // central wrote new value to characteristic, update LED
@@ -525,6 +531,10 @@ int searchServoPin(int pin){
     }
     return 0;
 }
+float convertRawAcceleration(int aRaw) {
+  float a = (aRaw * 2.0)*90.0 / 32768.0;
+  return a;
+}
 void readSensor(int device){
   /**************************************************
       ff 55 len idx action device port slot data a
@@ -641,14 +651,14 @@ void readSensor(int device){
    break;
    case  GYRO:{
        int axis = readBuffer(7);
-       float ax, ay, az;
-       CurieIMU.readAccelerometerScaled(ax, ay, az);
+       int ax, ay, az;
+       CurieIMU.readAccelerometer(ax, ay, az);
        if(axis == 1){
-         appendFloat(ax);
+         appendFloat(convertRawAcceleration(ax));
        }else if(axis == 2){
-         appendFloat(ay);
+         appendFloat(convertRawAcceleration(ay));
        }else if(axis == 3){
-         appendFloat(az);
+         appendFloat(convertRawAcceleration(az));
        }
    }
    break;
@@ -688,6 +698,14 @@ void readSensor(int device){
    break;
    case TIMER:{
      appendFloat((float)currentTime);
+   }
+   break;
+   case BUTTON:
+   {
+     if(buttonSensor.getPort() != port){
+       buttonSensor.reset(port);
+     }
+     appendByte(keyPressed==readBuffer(7));
    }
    break;
    case TOUCH_SENSOR:

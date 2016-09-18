@@ -153,7 +153,11 @@ void MeDCMotor::setpin(uint8_t dir_pin,uint8_t pwm_pin)
  */
 void MeDCMotor::reset(uint8_t port)
 {
-  MePort::reset(port);
+  
+  dc_pwm_pin = mePort[port].s1;
+  dc_dir_pin = mePort[port].s2;
+  pinMode(dc_dir_pin, OUTPUT);
+  pinMode(dc_pwm_pin, OUTPUT);
   last_speed = 500;
 }
 
@@ -200,12 +204,12 @@ void MeDCMotor::run(int16_t speed)
   if(speed > 0)
   {
     digitalWrite(dc_dir_pin,HIGH);
-    analogWrite(dc_pwm_pin,50);
+    analogWrite(dc_pwm_pin,speed);
   }
   else
   {
     digitalWrite(dc_dir_pin,LOW);
-    analogWrite(dc_pwm_pin,50);
+    analogWrite(dc_pwm_pin,-speed);
   }
 }
 

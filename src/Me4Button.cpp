@@ -134,11 +134,8 @@ uint8_t Me4Button::pressed(void)
     // If you want key resbonse faster, you can set DEBOUNCED_INTERVAL to a
     // smaller number in Me4Button.h.
     previous_time = current_time;
-#ifdef ME_PORT_DEFINED
-    key_temp_value = Me4Button::aRead2();
-#else  // ME_PORT_DEFINED
+    
     key_temp_value = analogRead(_KeyPin);
-#endif // ME_PORT_DEFINED
     if (key_debounced_count == 0)
     {
       key_debounced_value = key_temp_value;
@@ -173,24 +170,29 @@ uint8_t Me4Button::pressed(void)
       returnKey = KEY_1;
       break;
 
-    case 4:
-    case 5:
+    case 6:
+    case 7:
       returnKey = KEY_2;
       break;
 
-    case 6:
+    case 9:
       returnKey = KEY_3;
       break;
 
-    case 7:
+    case 10:
       returnKey = KEY_4;
       break;
 
-    case 9:
-    case 10:
+    default:
       returnKey = KEY_NULL;
       break;
   }
   return(returnKey);
 }
-
+int Me4Button::read(void)
+{
+  int key_temp_value;
+  pinMode(_KeyPin,INPUT);
+  key_temp_value = analogRead(_KeyPin);
+  return key_temp_value;
+}

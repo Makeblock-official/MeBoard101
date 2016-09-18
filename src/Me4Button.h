@@ -57,11 +57,11 @@
 #define KEY_3      (3)
 #define KEY_4      (4)
 
-#define KEY_NULL_VALUE   (962)     // 1023*((5-0.3)/5)
+#define KEY_NULL_VALUE   (1023)     // 1023*((5-0.3)/5)
 #define KEY_1_VALUE      (0)
-#define KEY_2_VALUE      (481)     // 962/2
-#define KEY_3_VALUE      (641)     // 962*2/3
-#define KEY_4_VALUE      (721)     // 962*3/4
+#define KEY_2_VALUE      (710)     // 962/2
+#define KEY_3_VALUE      (941)     // 962*2/3
+#define KEY_4_VALUE      (1021)     // 962*3/4
 
 #define DEBOUNCED_INTERVAL (8)
 // If you want key response faster, you can set DEBOUNCED_INTERVAL to a
@@ -137,6 +137,7 @@ public:
  *    The key should periodically read, if it was delayed, It will affect the sensitivity of the keys
  */
   uint8_t pressed(void);
+  int read(void);
 private:
   volatile unsigned long previous_time;
   volatile unsigned long key_debounced_count;

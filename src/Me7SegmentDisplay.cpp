@@ -226,7 +226,7 @@ void Me7SegmentDisplay::init(void)
 void Me7SegmentDisplay::writeByte(uint8_t wr_data)
 {
   uint8_t i;
-  uint8_t cnt0;
+  uint8_t cnt0 = 0;
   for (i = 0; i < 8; i++)  //sent 8bit data
   {
     digitalWrite(_clkPin, LOW);
@@ -240,22 +240,25 @@ void Me7SegmentDisplay::writeByte(uint8_t wr_data)
     }
     wr_data >>= 1;
     digitalWrite(_clkPin, HIGH);
-
   }
   digitalWrite(_clkPin, LOW); //wait for ACK
   digitalWrite(_dataPin, HIGH);
   digitalWrite(_clkPin, HIGH);
   pinMode(_dataPin, INPUT);
+  long t = 0;
   while (digitalRead(_dataPin))
   {
     cnt0 += 1;
+    t++;
     if (cnt0 == 200)
     {
       pinMode(_dataPin, OUTPUT);
       digitalWrite(_dataPin, LOW);
       cnt0 = 0;
     }
-    //pinMode(_dataPin,INPUT);
+    if(t>2048){
+      break;
+    }
   }
   pinMode(_dataPin, OUTPUT);
 
@@ -424,9 +427,12 @@ void Me7SegmentDisplay::display(float value)
   uint8_t i=0;
   bool isStart = false;
   uint8_t index = 0;
-  uint8_t disp[]={0,0,0,0};
+  disp[0] = 0;
+  disp[1] = 0;
+  disp[2] = 0;
+  disp[3] = 0;
   bool isNeg = false;
-  if((float)value<0)
+  if(value<0)
   {
     isNeg = true;
     value = -value;
@@ -606,14 +612,14 @@ Posotion_1:
  */
 void Me7SegmentDisplay::display(uint8_t DispData[])
 {
-  uint8_t SegData[4];
-  uint8_t i;
-  for (i = 0; i < 4; i++)
-  {
-    SegData[i] = DispData[i];
-  }
-  coding(SegData);
-  write(SegData);
+  // uint8_t SegData[4];
+  // uint8_t i;
+  // for (i = 0; i < 4; i++)
+  // {
+  //   SegData[i] = DispData[i];
+  // }
+  coding(DispData);
+  write(DispData);
 }
 
 /**

@@ -51,7 +51,6 @@
 #include "Adafruit_NeoPixel.h"
 #include "MeJoystick.h"
 #include "Me4Button.h"
-#include "MeTemperature.h"
 #include "MeFlameSensor.h"
 #include "MeGasSensor.h"
 #include "MeInfraredReceiver.h"

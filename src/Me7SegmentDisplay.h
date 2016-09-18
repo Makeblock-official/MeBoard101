@@ -487,5 +487,6 @@ private:
   void stop(void); // Send stop bits.
   uint8_t _clkPin;
   uint8_t _dataPin;
+  uint8_t disp[4];
 };
 #endif

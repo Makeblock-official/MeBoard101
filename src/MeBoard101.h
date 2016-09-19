@@ -40,6 +40,8 @@
 #include "MeUltrasonicSensor.h"
 #include "MeLineFollower.h"
 #include "MeDCMotor.h"
+#include "MeStepper.h"
+#include "MeEncoderMotor.h"
 #include "MeLightSensor.h"
 #include "MePotentiometer.h"
 #include "MeSoundSensor.h"

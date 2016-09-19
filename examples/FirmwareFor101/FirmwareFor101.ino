@@ -10,8 +10,9 @@ BLECharacteristic writeCharacteristic("FFE3", BLEWriteWithoutResponse,20);
 
 MeDCMotor dc;
 Servo servos[8];
+MeEncoderMotor encoders[2];
+MeStepper steppers[4];
 MeRGBLed led;
-
 MeUltrasonicSensor us;
 Me7SegmentDisplay seg;
 MePort generalDevice;
@@ -142,6 +143,13 @@ void setup() {
   CurieIMU.setAccelerometerRange(2);
   ledMx.setBrightness(6);
   ledMx.setColorIndex(1);
+  encoders[0] = MeEncoderMotor(SLOT_1);
+  encoders[1] = MeEncoderMotor(SLOT_2);
+  encoders[0].begin();
+  encoders[1].begin();
+  delay(500);
+  encoders[0].runSpeed(0);
+  encoders[1].runSpeed(0);
 }
 bool isNotify = false;
 void loop() {
@@ -170,6 +178,10 @@ void loop() {
   if(Serial1.available()){
     parseBleData(Serial1.read());
   }
+  steppers[0].runSpeedToPosition();
+  steppers[1].runSpeedToPosition();
+  steppers[2].runSpeedToPosition();
+  steppers[3].runSpeedToPosition();
 }
 void parseBleData(unsigned char c){
   if(c==0x55&&isStart==false){
@@ -257,6 +269,16 @@ void parseData(){
       case RESET:{
         //reset
 
+        dc.reset(PORT_1);
+        dc.run(0);
+        dc.reset(PORT_2);
+        dc.run(0);
+        dc.reset(PORT_9);
+        dc.run(0);
+        dc.reset(PORT_10);
+        dc.run(0);
+        encoders[0].runSpeed(0);
+        encoders[1].runSpeed(0);
         callOK();
       }
      break;
@@ -367,15 +389,25 @@ void runModule(int device){
      int maxSpeed = readShort(7);
      long distance = readLong(9);
      if(port==PORT_1){
-//      steppers[0] = MeStepper(PORT_1);
-//      steppers[0].moveTo(distance);
-//      steppers[0].setMaxSpeed(maxSpeed);
-//      steppers[0].setSpeed(maxSpeed);
+      steppers[0] = MeStepper(PORT_1);
+      steppers[0].moveTo(distance);
+      steppers[0].setMaxSpeed(maxSpeed);
+      steppers[0].setSpeed(maxSpeed);
      }else if(port==PORT_2){
-//      steppers[1] = MeStepper(PORT_2);
-//      steppers[1].moveTo(distance);
-//      steppers[1].setMaxSpeed(maxSpeed);
-//      steppers[1].setSpeed(maxSpeed);
+      steppers[1] = MeStepper(PORT_2);
+      steppers[1].moveTo(distance);
+      steppers[1].setMaxSpeed(maxSpeed);
+      steppers[1].setSpeed(maxSpeed);
+     }else if(port==PORT_9){
+      steppers[2] = MeStepper(PORT_9);
+      steppers[2].moveTo(distance);
+      steppers[2].setMaxSpeed(maxSpeed);
+      steppers[2].setSpeed(maxSpeed);
+     }else if(port==PORT_10){
+      steppers[3] = MeStepper(PORT_10);
+      steppers[3].moveTo(distance);
+      steppers[3].setMaxSpeed(maxSpeed);
+      steppers[3].setSpeed(maxSpeed);
      }
     }
     break;
@@ -383,6 +415,11 @@ void runModule(int device){
       int slot = readBuffer(7);
       int maxSpeed = readShort(8);
       float distance = readFloat(10);
+      if(slot==SLOT_1){
+         encoders[0].move(distance,maxSpeed);
+      }else if(slot==SLOT_2){
+         encoders[1].move(distance,maxSpeed);
+      }
     }
     break;
    case RGBLED:{

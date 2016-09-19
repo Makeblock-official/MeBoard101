@@ -34,7 +34,7 @@
  [Switch](http://www.makeblock.com/index.php?route=product/search&search=Switch) | ✓ | ✓ | ✓
  [PIRMotion Sensor](http://www.makeblock.com/me-pir-motion-sensor) | ✓ | ✓ | ✓
  [Infrared Receiver](http://www.makeblock.com/me-infrared-receiver-decode) | ✓ | ✓ | ✘
- [Temperature Sensor(DS18B20)](http://www.makeblock.com/me-temperature-sensor-waterproof-ds18b20) | ✓ | ✓ | ✘
+ [Temperature Sensor(DS18B20)](http://www.makeblock.com/me-temperature-sensor-waterproof-ds18b20) | ✘ | ✘ | ✘
  [Temperature and Humidity Sensor](http://www.makeblock.com/me-temperature-and-humidity-sensor) | ✓ | ✓ | ✓
  [Flame Sensor](http://www.makeblock.com/me-flame-sensor) | ✓ | ✓ | ✓
  [Gas Sensor](http://www.makeblock.com/me-gas-sensor) | ✓ | ✓ | ✓

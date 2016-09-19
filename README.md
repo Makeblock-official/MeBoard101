@@ -18,6 +18,25 @@
  Module | Arduino IDE | mBlock | App
  ------ | ----------- | ------ | ---
  DC Motor | ✓ | ✓ | ✓
- Servo | ✓ | ✓ | ✓ 
+ Servo Motor | ✓ | ✓ | ✓ 
  Encoder Motor | ✓ | ✓ | ✘
  Stepper Motor | ✓ | ✓ | ✘  
+ 7 Segments Display | ✓ | ✓ | ✓
+ RGB LED | ✓ | ✓ | ✓
+ DSLR Shutter | ✓ | ✓ | ✘
+ Ultrasonic Sensor | ✓ | ✓ | ✓
+ LineFollower | ✓ | ✓ | ✓
+ Light Sensor | ✓ | ✓ | ✓
+ Sound Sensor | ✓ | ✓ | ✓
+ Touch Sensor | ✓ | ✓ | ✓
+ Joystick | ✓ | ✓ | ✓
+ Potentiometer | ✓ | ✓ | ✓
+ LimitSwitch | ✓ | ✓ | ✓
+ [PIRMotion Sensor](http://www.makeblock.com/me-pir-motion-sensor) | ✓ | ✓ | ✓
+ Infrared Receiver | ✓ | ✓ | ✘
+ Temperature Sensor | ✓ | ✓ | ✘
+ [Temperature and Humidity Sensor](http://www.makeblock.com/me-temperature-and-humidity-sensor) | ✓ | ✓ | ✓
+ Flame Sensor | ✓ | ✓ | ✓
+ Gas Sensor | ✓ | ✓ | ✓
+ Button | ✘ | ✘ | ✘
+ Gyro on Board | ✓ | ✓ | ✘

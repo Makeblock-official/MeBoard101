@@ -1,8 +1,9 @@
 # MeBoard101
-## Intro
-[Me Uno Shield](http://www.makeblock.com/me-uno-shield) is a shield of Arduino UNO and Arduino101/Genuino101. It can turn Arduino Pins into Makeblock Rj25 ports.
+## Introduction
+[Me Uno Shield](http://www.makeblock.com/me-uno-shield) is a shield of Arduino UNO and Arduino101/Genuino101. It can turn Arduino Pins into Makeblock Rj25 ports.You can connect Arduino101/Genuino101 with Makeblock electronic modules. This shield provides a stable power, so it can drive many servos and motors.
  ![image](https://raw.githubusercontent.com/Makeblock-official/MeBoard101/master/images/1.jpg)
  ![image](https://raw.githubusercontent.com/Makeblock-official/MeBoard101/master/images/2.jpg)
+ 
 ## How To Use
 ### Prepare for Arduino
  * Install the Arduino IDE ( https://www.arduino.cc/en/Main/Software )
@@ -19,6 +20,7 @@
  * Compile and upload firmware according to your Arduino101/Genuino101 board.
 
  ## Support for Makeblock Electronic Modules
+ 
  Module | Arduino IDE | mBlock | Makeblock App
  ------ | ----------- | ------ | ---
  [DC Motor](http://www.makeblock.com/index.php?route=product/search&search=dc%20motor) | ✓ | ✓ | ✓

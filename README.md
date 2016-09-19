@@ -15,28 +15,28 @@
  * Compile and upload firmware according to your Arduino101/Genuino101 board.
 
  ### Support for Makeblock Electronic Modules
- Module | Arduino IDE | mBlock | App
+ Module | Arduino IDE | mBlock | Makeblock App
  ------ | ----------- | ------ | ---
- DC Motor | ✓ | ✓ | ✓
- Servo Motor | ✓ | ✓ | ✓ 
- Encoder Motor | ✓ | ✓ | ✘
- Stepper Motor | ✓ | ✓ | ✘  
- 7 Segments Display | ✓ | ✓ | ✓
- RGB LED | ✓ | ✓ | ✓
- DSLR Shutter | ✓ | ✓ | ✘
- Ultrasonic Sensor | ✓ | ✓ | ✓
- LineFollower | ✓ | ✓ | ✓
- Light Sensor | ✓ | ✓ | ✓
- Sound Sensor | ✓ | ✓ | ✓
- Touch Sensor | ✓ | ✓ | ✓
- Joystick | ✓ | ✓ | ✓
- Potentiometer | ✓ | ✓ | ✓
- LimitSwitch | ✓ | ✓ | ✓
+ [DC Motor](http://www.makeblock.com/index.php?route=product/search&search=dc%20motor) | ✓ | ✓ | ✓
+ [Servo Motor](http://www.makeblock.com/index.php?route=product/search&search=servo) | ✓ | ✓ | ✓ 
+ [Encoder Motor](http://www.makeblock.com/index.php?route=product/search&search=Encoder) | ✓ | ✓ | ✘
+ [Stepper Motor](http://www.makeblock.com/index.php?route=product/search&search=Stepper) | ✓ | ✓ | ✘  
+ [7-Segment Display](http://www.makeblock.com/me-7-segment-serial-display-red) | ✓ | ✓ | ✓
+ [RGB LED](http://www.makeblock.com/index.php?route=product/search&search=RGB) | ✓ | ✓ | ✓
+ [DSLR Shutter](http://www.makeblock.com/index.php?route=product/search&search=Shutter) | ✓ | ✓ | ✘
+ [Ultrasonic Sensor](http://www.makeblock.com/me-ultrasonic-sensor) | ✓ | ✓ | ✓
+ [Line Follower](http://www.makeblock.com/me-line-follower) | ✓ | ✓ | ✓
+ [Light Sensor](http://www.makeblock.com/me-light-sensor) | ✓ | ✓ | ✓
+ [Sound Sensor](http://www.makeblock.com/me-sound-sensor) | ✓ | ✓ | ✓
+ [Touch Sensor](http://www.makeblock.com/me-touch-sensor) | ✓ | ✓ | ✓
+ [Joystick](http://www.makeblock.com/me-joystick) | ✓ | ✓ | ✓
+ [Potentiometer](http://www.makeblock.com/index.php?route=product/search&search=Potentiometer) | ✓ | ✓ | ✓
+ [Switch](http://www.makeblock.com/index.php?route=product/search&search=Switch) | ✓ | ✓ | ✓
  [PIRMotion Sensor](http://www.makeblock.com/me-pir-motion-sensor) | ✓ | ✓ | ✓
- Infrared Receiver | ✓ | ✓ | ✘
- Temperature Sensor | ✓ | ✓ | ✘
+ [Infrared Receiver](http://www.makeblock.com/me-infrared-receiver-decode) | ✓ | ✓ | ✘
+ [Temperature Sensor(DS18B20)](http://www.makeblock.com/me-temperature-sensor-waterproof-ds18b20) | ✓ | ✓ | ✘
  [Temperature and Humidity Sensor](http://www.makeblock.com/me-temperature-and-humidity-sensor) | ✓ | ✓ | ✓
- Flame Sensor | ✓ | ✓ | ✓
- Gas Sensor | ✓ | ✓ | ✓
- Button | ✘ | ✘ | ✘
- Gyro on Board | ✓ | ✓ | ✘
+ [Flame Sensor](http://www.makeblock.com/me-flame-sensor) | ✓ | ✓ | ✓
+ [Gas Sensor](http://www.makeblock.com/me-gas-sensor) | ✓ | ✓ | ✓
+ [Button](http://www.makeblock.com/me-4-button) | ✘ | ✘ | ✘
+ [Gyro on Board](https://www.arduino.cc/en/Tutorial/Genuino101CurieIMURawImuDataSerial) | ✓ | ✓ | ✘

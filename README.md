@@ -14,6 +14,10 @@
  * Open Arduino IDE, choose the firmware101 from <em>File Examples MeBoard101</em>.
  * Compile and upload firmware according to your Arduino101/Genuino101 board.
 
+ ### Support for Makeblock Electronic Modules
  Module | Arduino IDE | mBlock | App
  ------ | ----------- | ------ | ---
- DC Motor | y | y | y
+ DC Motor | ✓ | ✓ | ✓
+ Servo | ✓ | ✓ | ✓ 
+ Encoder Motor | ✓ | ✓ | ✘
+ Stepper Motor | ✓ | ✓ | ✘  

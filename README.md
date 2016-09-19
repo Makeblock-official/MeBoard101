@@ -13,3 +13,7 @@
    * (on Mac OSX): ```[\Users\XXX\Documents]\Arduino\libraries\MeBoard101\src```
  * Open Arduino IDE, choose the firmware101 from <em>File Examples MeBoard101</em>.
  * Compile and upload firmware according to your Arduino101/Genuino101 board.
+
+ Module | Arduino IDE | mBlock | App
+ ------ | ----------- | ------ | ---
+ DC Motor | y | y | y

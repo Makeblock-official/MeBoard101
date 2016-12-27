@@ -13,7 +13,7 @@
  * From **Tools** select the **Board Arduino/Genuinio 101**
  ![image](https://raw.githubusercontent.com/Makeblock-official/MeBoard101/master/images/101_Board_select.jpg)
  * Download the library for Arduino101/Genuino101 https://github.com/Makeblock-official/MeBoard101/archive/master.zip
- * Copy the makeblock folder to your arduino default library. Your Arduino library folder should now look like this 
+ * Copy the MeBoard101 folder to your arduino default library. Your Arduino library folder should now look like this 
    * (on Windows): ```[x:\Users\XXX\Documents]\Arduino\libraries\MeBoard101\src```
    * (on Mac OSX): ```[\Users\XXX\Documents]\Arduino\libraries\MeBoard101\src```
  * Open Arduino IDE, choose the firmware101 from <em>File Examples MeBoard101</em>.

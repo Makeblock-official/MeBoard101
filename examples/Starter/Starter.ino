@@ -94,7 +94,7 @@ void lineFollowMode(){
 }
 void move(int spd1,int spd2){
   if(spd1!=0){
-    dcLeft.run(spd1);
+    dcLeft.run(-spd1);
   }else{
     dcLeft.stop();
   }

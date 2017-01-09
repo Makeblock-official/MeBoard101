@@ -189,6 +189,7 @@ uint8_t Me4Button::pressed(void)
   }
   return(returnKey);
 }
+
 int Me4Button::read(void)
 {
   int key_temp_value;

@@ -1,9 +1,10 @@
 #include <CurieBLE.h>
 #include <CurieIMU.h>
 #include <MeBoard101.h>
+#include <MadgwickAHRS.h>
 
-BLEPeripheral blePeripheral;  // BLE Peripheral Device (the board you're programming)
-BLEService firmwareService("FFE1"); // BLE Service
+BLEPeripheral blePeripheral;         // BLE Peripheral Device (the board you're programming)
+BLEService firmwareService("FFE1");  // BLE Service
 
 BLECharacteristic readCharacteristic("FFE2", BLENotify,20);
 BLECharacteristic writeCharacteristic("FFE3", BLEWriteWithoutResponse,20);
@@ -13,7 +14,7 @@ Servo servos[8];
 MeEncoderMotor encoders[2];
 MeStepper steppers[4];
 MeRGBLed led;
-MeUltrasonicSensor us;
+MeUltrasonicSensor us(PORT_4);
 Me7SegmentDisplay seg;
 MePort generalDevice;
 MeJoystick joystick;
@@ -23,6 +24,10 @@ MeGasSensor GasSensor;
 MeTouchSensor touchSensor;
 MeLEDMatrix ledMx;
 Me4Button buttonSensor;
+MeLineFollower line(PORT_3);
+MeInfraredReceiver *ir = NULL;  //PORT_8
+Madgwick filter;
+
 typedef struct MeModule
 {
     int device;
@@ -51,10 +56,20 @@ union{
 
 MeModule modules[12];
 
+#define BLUE_TOOTH        0
+#define IR_CONTROLER      1
+
+
+#define IR_CONTROLER_MODE   0
+#define ULTRASONIC_MODE     1
+#define LINEFOLLOW_MODE     2
+#define IR_CUSTOM_MODE      4
+
+
 int analogs[6]={A0,A1,A2,A3,A4,A5};
 
   
-String mVersion = "0a.01.105";
+String mVersion = "11.01.001";
 boolean isAvailable = false;
 boolean isBluetooth = false;
 
@@ -68,43 +83,90 @@ byte modulesLen=0;
 boolean isStart = false;
 unsigned char irRead;
 char serialRead;
-#define VERSION 0
-#define ULTRASONIC_SENSOR 1
-#define TEMPERATURE_SENSOR 2
-#define LIGHT_SENSOR 3
-#define POTENTIONMETER 4
-#define JOYSTICK 5
-#define GYRO 6
-#define SOUND_SENSOR 7
-#define RGBLED 8
-#define SEVSEG 9
-#define MOTOR 10
-#define SERVO 11
-#define ENCODER 12
-#define IR 13
-#define IRREMOTE 14
-#define PIRMOTION 15
-#define INFRARED 16
-#define LINEFOLLOWER 17
-#define IRREMOTECODE 18
-#define SHUTTER 20
-#define LIMITSWITCH 21
-#define BUTTON 22
-#define HUMITURE 23
-#define FLAMESENSOR 24
-#define GASSENSOR 25
-#define COMPASS 26
-#define DIGITAL 30
-#define ANALOG 31
-#define PWM 32
-#define SERVO_PIN 33
-#define TONE 34
-#define PULSEIN 37
-#define ULTRASONIC_ARDUINO 36
-#define STEPPER 40
-#define LEDMATRIX 41
-#define TIMER 50
-#define TOUCH_SENSOR 51
+
+int arduino101_mode = IR_CONTROLER_MODE;
+int LineFollowFlag=0;
+int moveSpeed = 190;
+int turnSpeed = 200;
+int minSpeed = 45;
+uint8_t controlflag = IR_CONTROLER;
+int distance=0;
+int randnum = 0;
+int factor = 23;
+unsigned long microsPrevious;
+float accelScale, gyroScale;
+float roll, pitch, yaw;
+
+boolean leftflag = false;
+boolean rightflag = false;
+bool isNotify = false;
+
+#define VERSION                0
+#define ULTRASONIC_SENSOR      1
+#define TEMPERATURE_SENSOR     2
+#define LIGHT_SENSOR           3
+#define POTENTIONMETER         4
+#define JOYSTICK               5
+#define GYRO                   6
+#define SOUND_SENSOR           7
+#define RGBLED                 8
+#define SEVSEG                 9
+#define MOTOR                  10
+#define SERVO                  11
+#define ENCODER                12
+#define IR                     13
+#define IRREMOTE               14
+#define PIRMOTION              15
+#define INFRARED               16
+#define LINEFOLLOWER           17
+#define IRREMOTECODE           18
+#define SHUTTER                20
+#define LIMITSWITCH            21
+#define BUTTON                 22
+#define HUMITURE               23
+#define FLAMESENSOR            24
+#define GASSENSOR              25
+#define COMPASS                26
+#define TEMPERATURE_SENSOR_1   27
+#define DIGITAL                30
+#define ANALOG                 31
+#define PWM                    32
+#define SERVO_PIN              33
+#define TONE                   34
+#define BUTTON_INNER           35
+#define ULTRASONIC_ARDUINO     36
+#define PULSEIN                37
+#define STEPPER                40
+#define LEDMATRIX              41
+#define TIMER                  50
+#define TOUCH_SENSOR           51
+#define JOYSTICK_MOVE          52
+#define COMMON_COMMONCMD       60
+  //Secondary command
+  #define SET_STARTER_MODE     0x10
+  #define SET_AURIGA_MODE      0x11
+  #define SET_MEGAPI_MODE      0x12
+  #define GET_BATTERY_POWER    0x70
+  #define GET_AURIGA_MODE      0x71
+  #define GET_MEGAPI_MODE      0x72
+#define ENCODER_BOARD          61
+  //Read type
+  #define ENCODER_BOARD_POS    0x01
+  #define ENCODER_BOARD_SPEED  0x02
+
+#define ENCODER_PID_MOTION     62
+  //Secondary command
+  #define ENCODER_BOARD_POS_MOTION         0x01
+  #define ENCODER_BOARD_SPEED_MOTION       0x02
+  #define ENCODER_BOARD_PWM_MOTION         0x03
+  #define ENCODER_BOARD_SET_CUR_POS_ZERO   0x04
+  #define ENCODER_BOARD_CAR_POS_MOTION     0x05
+  
+#define PM25SENSOR             63
+  //Secondary command
+  #define GET_PM1_0         0x01
+  #define GET_PM2_5         0x02
+  #define GET_PM10          0x03
 
 #define GET 1
 #define RUN 2
@@ -120,69 +182,128 @@ uint8_t command_index = 0;
 uint8_t receivedBuffer[64];
 int receivedBufferLength = 0;
 bool isReceiving = false;
-void setup() {
-  Serial.begin(115200);
-  Serial1.begin(115200);
-  CurieIMU.begin();
-  
-  blePeripheral.setLocalName("Makeblock");
-  blePeripheral.setDeviceName("Makeblock");
 
-  blePeripheral.setAdvertisedServiceUuid(firmwareService.uuid());
-
-  // add service and characteristic:
-  blePeripheral.addAttribute(firmwareService);
-  blePeripheral.addAttribute(writeCharacteristic);
-  blePeripheral.addAttribute(readCharacteristic);
-
-  writeCharacteristic.setEventHandler(BLEWritten, mBotCharacteristicWritten);
-// set an initial value for the characteristic
-  // begin advertising BLE service:
-  blePeripheral.begin();
-  CurieIMU.begin();
-  CurieIMU.setAccelerometerRange(2);
-  ledMx.setBrightness(6);
-  ledMx.setColorIndex(1);
-  encoders[0] = MeEncoderMotor(SLOT_1);
-  encoders[1] = MeEncoderMotor(SLOT_2);
-  encoders[0].begin();
-  encoders[1].begin();
-  delay(500);
-  encoders[0].runSpeed(0);
-  encoders[1].runSpeed(0);
+void Forward()
+{
+  dc.reset(PORT_2);
+  dc.run(-moveSpeed);
+  dc.reset(PORT_9);
+  dc.run(moveSpeed);
 }
-bool isNotify = false;
-void loop() {
-  
-  keyPressed = buttonSensor.pressed();
-  blePeripheral.poll();
-  BLECentral central = blePeripheral.central();
-  if (central) {
-    if(readCharacteristic.subscribed()) {
-      if(isNotify){
-        readCharacteristic.setValue(bleBuffer,bleBufferIndex);
-        bleBufferIndex = 0;
-        isNotify = false;
-      }
-    }
-  }
-  if(isReceiving==false){
-    for(int i=0;i<receivedBufferLength;i++){
-      parseBleData(receivedBuffer[i]);
-    }
-    receivedBufferLength = 0;
-  }
-  if(Serial.available()){
-    parseBleData(Serial.read());
-  }
-  if(Serial1.available()){
-    parseBleData(Serial1.read());
-  }
-  steppers[0].runSpeedToPosition();
-  steppers[1].runSpeedToPosition();
-  steppers[2].runSpeedToPosition();
-  steppers[3].runSpeedToPosition();
+
+void Backward()
+{
+  dc.reset(PORT_2);
+  dc.run(moveSpeed);
+  dc.reset(PORT_9);
+  dc.run(-moveSpeed);
 }
+
+void BackwardAndTurnLeft()
+{
+  dc.reset(PORT_2);
+  dc.run(moveSpeed/2);
+  dc.reset(PORT_9);
+  dc.run(-moveSpeed);
+}
+
+void BackwardAndTurnRight()
+{
+  dc.reset(PORT_2);
+  dc.run(moveSpeed);
+  dc.reset(PORT_9);
+  dc.run(-moveSpeed/2);
+}
+
+void TurnLeft()
+{
+  dc.reset(PORT_2);
+  dc.run(moveSpeed);
+  dc.reset(PORT_9);
+  dc.run(moveSpeed);
+}
+
+void TurnRight()
+{
+  dc.reset(PORT_2);
+  dc.run(-moveSpeed);
+  dc.reset(PORT_9);
+  dc.run(-moveSpeed);
+}
+
+void Stop()
+{
+  dc.reset(PORT_2);
+  dc.run(0);
+  dc.reset(PORT_9);
+  dc.run(0);
+}
+void ChangeSpeed(int spd)
+{
+  moveSpeed = spd;
+}
+
+float convertRawAcceleration(int aRaw) {
+  float a = (aRaw * 2.0)*90.0 / 32768.0;
+  return a;
+}
+
+float convertRawGyro(int gRaw) {
+  // since we are using 250 degrees/seconds range
+  // -250 maps to a raw value of -32768
+  // +250 maps to a raw value of 32767
+  
+  float g = (gRaw * 250.0) / 32768.0;
+  return g;
+}
+
+void gyroLoop(void)
+{
+  int aix, aiy, aiz;
+  int gix, giy, giz;
+  float ax, ay, az;
+  float gx, gy, gz;
+  unsigned long millisNow;
+  millisNow = millis();
+  if(millisNow - microsPrevious >= 40)
+  {
+    // read raw data from CurieIMU
+    CurieIMU.readMotionSensor(aix, aiy, aiz, gix, giy, giz);
+
+    // convert from raw data to gravity and degrees/second units
+    ax = convertRawAcceleration(aix);
+    ay = convertRawAcceleration(aiy);
+    az = convertRawAcceleration(aiz);
+    gx = convertRawGyro(gix);
+    gy = convertRawGyro(giy);
+    gz = convertRawGyro(giz);
+
+    // update the filter, which computes orientation
+    filter.updateIMU(gx, gy, gz, ax, ay, az);
+
+    // print the heading, pitch and roll
+    roll = filter.getRoll();
+    pitch = filter.getPitch();
+    yaw = filter.getYaw();
+    microsPrevious = microsPrevious + 40; 
+  }
+}
+double getAngle(uint8_t index)
+{
+  if(index == 1)
+  {
+    return roll;
+  }
+  else if(index == 2)
+  {
+    return pitch;
+  }
+  else if(index == 3)
+  {
+    return yaw;
+  }
+} 
+
 void parseBleData(unsigned char c){
   if(c==0x55&&isStart==false){
    if(prevc==0xff){
@@ -372,6 +493,7 @@ void runModule(int device){
   switch(device){
    case MOTOR:{
      int speed = readShort(7);
+     controlflag = BLUE_TOOTH;
      dc.reset(port);
      dc.run(speed);
     }
@@ -379,8 +501,9 @@ void runModule(int device){
     case JOYSTICK:{
      int leftSpeed = readShort(6);
      int rightSpeed = readShort(8);
-     dc.reset(M1);
-     dc.reset(M2);
+     controlflag = BLUE_TOOTH;
+     dc.reset(PORT_2);
+     dc.reset(PORT_9);
      dc.run(leftSpeed);
      dc.run(rightSpeed);
     }
@@ -567,10 +690,7 @@ int searchServoPin(int pin){
     }
     return 0;
 }
-float convertRawAcceleration(int aRaw) {
-  float a = (aRaw * 2.0)*90.0 / 32768.0;
-  return a;
-}
+
 void readSensor(int device){
   /**************************************************
       ff 55 len idx action device port slot data a
@@ -620,6 +740,31 @@ void readSensor(int device){
      appendFloat(value);
    }
    break;
+    case  INFRARED:
+      {
+        arduino101_mode = IR_CUSTOM_MODE;
+        if(ir == NULL)
+        {
+          ir = new MeInfraredReceiver(port);
+          ir->begin();
+        }
+        else if(ir->getPort() != port)
+        {
+          delete ir;
+          ir = new MeInfraredReceiver(port);
+          ir->begin();
+        }
+        irRead = ir->getCode();
+        if((irRead < 255) && (irRead > 0))
+        {
+          appendFloat((float)irRead);
+        }
+        else
+        {
+          appendFloat(0);
+        }
+      }
+      break;
    case  PIRMOTION:{
      if(generalDevice.getPort()!=port){
        generalDevice.reset(port);
@@ -687,15 +832,8 @@ void readSensor(int device){
    break;
    case  GYRO:{
        int axis = readBuffer(7);
-       int ax, ay, az;
-       CurieIMU.readAccelerometer(ax, ay, az);
-       if(axis == 1){
-         appendFloat(convertRawAcceleration(ax));
-       }else if(axis == 2){
-         appendFloat(convertRawAcceleration(ay));
-       }else if(axis == 3){
-         appendFloat(convertRawAcceleration(az));
-       }
+       value = getAngle(axis);
+       appendFloat(value);
    }
    break;
    case  VERSION:{
@@ -754,3 +892,276 @@ void readSensor(int device){
    break;
   }
 }
+
+void lineFollow(void)
+{
+  uint8_t val;
+  val = line.readSensors();
+  if(moveSpeed >100)
+  {
+    moveSpeed=100;
+  }
+  switch (val)
+  {
+    case S1_IN_S2_IN:
+      Forward();
+      LineFollowFlag=10;
+      break;
+
+    case S1_IN_S2_OUT:
+       Forward();
+      if (LineFollowFlag>1) LineFollowFlag--;
+      break;
+
+    case S1_OUT_S2_IN:
+      Forward();
+      if (LineFollowFlag<20) LineFollowFlag++;
+      break;
+
+    case S1_OUT_S2_OUT:
+      if(LineFollowFlag==10) Backward();
+      if(LineFollowFlag<10) TurnLeft();
+      if(LineFollowFlag>10) TurnRight();
+      break;
+  }
+//  delay(50);
+}
+
+void ultrCarProcess(void)
+{
+  distance = us.distanceCm();
+  randomSeed(analogRead(A4));
+  if(moveSpeed >100)
+  {
+    moveSpeed=100;
+  }
+  if((distance > 10) && (distance < 40))
+  {
+    randnum=random(300);
+    if((randnum > 190) && (!rightflag))
+    {
+      leftflag=true;
+      TurnLeft();   
+    }
+    else
+    {
+      rightflag=true;
+      TurnRight();  
+    }
+  }
+  else if(distance < 10)
+  {
+    randnum=random(300);
+    if(randnum > 190)
+    {
+      BackwardAndTurnLeft();
+    }
+    else
+    {
+      BackwardAndTurnRight();
+    }
+  }
+  else
+  {
+    leftflag=false;
+    rightflag=false;
+    Forward();
+  }
+}
+
+void IrProcess(void)
+{
+  ir->loop();
+  irRead = ir->getCode();
+  if((arduino101_mode != IR_CONTROLER_MODE) &&
+     (irRead != IR_BUTTON_TEST) && 
+     (irRead != IR_BUTTON_A) &&
+     (irRead != IR_BUTTON_B) &&
+     (irRead != IR_BUTTON_C))
+  {
+    return;
+  }
+  switch(irRead)
+  {
+    case IR_BUTTON_A:
+      Stop();
+      arduino101_mode = IR_CONTROLER_MODE;
+      moveSpeed=100;
+      break;
+    case IR_BUTTON_B:
+      Stop();
+      arduino101_mode = ULTRASONIC_MODE;
+      moveSpeed=100;
+      break;
+    case IR_BUTTON_C:
+      Stop();
+      arduino101_mode = LINEFOLLOW_MODE;
+      moveSpeed=100;
+      break;
+    case IR_BUTTON_PLUS:
+      controlflag = IR_CONTROLER;
+      Forward();
+      break;
+    case IR_BUTTON_MINUS:
+      controlflag = IR_CONTROLER;
+      Backward();
+      break;
+    case IR_BUTTON_NEXT:
+      controlflag = IR_CONTROLER;
+      TurnRight();
+      break;
+    case IR_BUTTON_PREVIOUS:
+      controlflag = IR_CONTROLER;
+      TurnLeft();
+      break;
+    case IR_BUTTON_9:
+      controlflag = IR_CONTROLER;
+      ChangeSpeed(factor*9+minSpeed);
+      break;
+    case IR_BUTTON_8:
+      controlflag = IR_CONTROLER;
+      ChangeSpeed(factor*8+minSpeed);
+      break;
+    case IR_BUTTON_7:
+      controlflag = IR_CONTROLER;
+      ChangeSpeed(factor*7+minSpeed);
+      break;
+    case IR_BUTTON_6:
+      controlflag = IR_CONTROLER;
+      ChangeSpeed(factor*6+minSpeed);
+      break;
+    case IR_BUTTON_5:
+      controlflag = IR_CONTROLER;
+      ChangeSpeed(factor*5+minSpeed);
+      break;
+    case IR_BUTTON_4:
+      controlflag = IR_CONTROLER;
+      ChangeSpeed(factor*4+minSpeed);
+      break;
+    case IR_BUTTON_3:
+      controlflag = IR_CONTROLER;
+      ChangeSpeed(factor*3+minSpeed);
+      break;
+    case IR_BUTTON_2:
+      controlflag = IR_CONTROLER;
+      ChangeSpeed(factor*2+minSpeed);
+      break;
+    case IR_BUTTON_1:
+      controlflag = IR_CONTROLER;
+      ChangeSpeed(factor*1+minSpeed);
+      break;
+    case IR_BUTTON_TEST:
+      Stop();
+      while(ir->buttonState() != 0)
+      {
+        ir->loop();
+      }
+      arduino101_mode = arduino101_mode + 1;
+      if(arduino101_mode == 3)
+      { 
+        arduino101_mode = 0;
+      }
+      break;
+    default:
+      if(controlflag == IR_CONTROLER)
+      {
+        Stop();
+      }
+      break;
+  }
+}
+
+void setup(){
+  Serial.begin(115200);
+  Serial1.begin(115200);
+  blePeripheral.setLocalName("Makeblock");
+  blePeripheral.setDeviceName("Makeblock");
+
+  blePeripheral.setAdvertisedServiceUuid(firmwareService.uuid());
+
+  // add service and characteristic:
+  blePeripheral.addAttribute(firmwareService);
+  blePeripheral.addAttribute(writeCharacteristic);
+  blePeripheral.addAttribute(readCharacteristic);
+
+  writeCharacteristic.setEventHandler(BLEWritten, mBotCharacteristicWritten);
+// set an initial value for the characteristic
+  // begin advertising BLE service:
+  blePeripheral.begin();
+  CurieIMU.begin();
+  CurieIMU.setGyroRate(25);
+  CurieIMU.setAccelerometerRate(25);
+  filter.begin(25);
+  // Set the accelerometer range to 2G
+  CurieIMU.setAccelerometerRange(2);
+  // Set the gyroscope range to 250 degrees/second
+  CurieIMU.setGyroRange(250);
+
+// initialize variables to pace updates to correct rate
+  microsPrevious = millis();;
+
+  ledMx.setBrightness(6);
+  ledMx.setColorIndex(1);
+  encoders[0] = MeEncoderMotor(SLOT_1);
+  encoders[1] = MeEncoderMotor(SLOT_2);
+  encoders[0].begin();
+  encoders[1].begin();
+  delay(500);
+  encoders[0].runSpeed(0);
+  encoders[1].runSpeed(0);
+
+  if(ir == NULL)
+  {
+    ir = new MeInfraredReceiver(PORT_8);
+    ir->begin();
+  }
+}
+
+void loop(){
+  keyPressed = buttonSensor.pressed();
+  blePeripheral.poll();
+  BLECentral central = blePeripheral.central();
+  if (central) {
+    if(readCharacteristic.subscribed()) {
+      if(isNotify){
+        readCharacteristic.setValue(bleBuffer,bleBufferIndex);
+        bleBufferIndex = 0;
+        isNotify = false;
+      }
+    }
+  }
+  if(isReceiving==false){
+    for(int i=0;i<receivedBufferLength;i++){
+      parseBleData(receivedBuffer[i]);
+    }
+    receivedBufferLength = 0;
+  }
+  if(Serial.available()){
+    parseBleData(Serial.read());
+  }
+  if(Serial1.available()){
+    parseBleData(Serial1.read());
+  }
+  steppers[0].runSpeedToPosition();
+  steppers[1].runSpeedToPosition();
+  steppers[2].runSpeedToPosition();
+  steppers[3].runSpeedToPosition();
+  gyroLoop();
+  if(arduino101_mode != IR_CUSTOM_MODE) 
+  {
+    IrProcess();
+  }
+  else
+  {
+    ir->loop();
+  }
+  if(arduino101_mode == ULTRASONIC_MODE)
+  {
+    ultrCarProcess();    
+  }
+  else if(arduino101_mode == LINEFOLLOW_MODE) 
+  {
+    lineFollow();
+  }
+}
+

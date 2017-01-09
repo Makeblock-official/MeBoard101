@@ -131,8 +131,7 @@ int16_t MeInfraredReceiver::read(void)
   return(val);
 }
 int16_t MeInfraredReceiver::available(void){
-	
-	return ir->available();
+  return ir->available();
 }
 /**
  * \par Function
@@ -149,7 +148,7 @@ int16_t MeInfraredReceiver::available(void){
 bool MeInfraredReceiver::buttonState(void)
 {
   bool val;
-
+  pinMode(_KeyCheckPin, INPUT);
   val =  digitalRead(_KeyCheckPin);
   return(!val);
 }

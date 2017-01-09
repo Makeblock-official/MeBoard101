@@ -201,6 +201,14 @@ void MeDCMotor::run(int16_t speed)
 {
   speed	= speed > 255 ? 255 : speed;
   speed	= speed < -255 ? -255 : speed;
+  if(last_speed != speed)
+  {
+    last_speed = speed;
+  }
+  else
+  {
+    return;
+  }
   if(speed > 0)
   {
     digitalWrite(dc_dir_pin,HIGH);

@@ -498,7 +498,7 @@ public:
   
 /**
  * \par Function
- *    isTarPosReaches
+ *    isTarPosReached
  * \par Description
  *    Check whether the target position has been reached
  * \param[in]
@@ -511,7 +511,7 @@ public:
  * \par Others
  *    None
  */
-  boolean isTarPosReaches(void);
+  boolean isTarPosReached(void);
 
 private:
 /**

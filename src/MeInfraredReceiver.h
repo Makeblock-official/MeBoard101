@@ -48,6 +48,10 @@
 #include <Arduino.h>
 #include "MeConfig.h"
 
+#ifdef ME_PORT_DEFINED
+#include "MePort.h"
+#endif // ME_PORT_DEFINED
+
 /* NEC Code table */
 #define IR_BUTTON_POWER     (0x45)
 #define IR_BUTTON_A         (0x45)
@@ -93,7 +97,7 @@
 #ifndef ME_PORT_DEFINED
 class MeInfraredReceiver
 #else // !ME_PORT_DEFINED
-class MeInfraredReceiver : public MePort
+class MeInfraredReceiver : public MePort, public SoftwareSerial
 #endif // !ME_PORT_DEFINED
 {
 public:
@@ -156,7 +160,7 @@ public:
  * \par Others
  *   None
  */
-  int16_t read();
+  int read(void);
 
 /**
  * \par Function
@@ -199,12 +203,11 @@ public:
  *   This function used with getCode
  */
   void loop(void);
-  int16_t available(void);
+  int available(void);
 private:
   volatile uint8_t _RxPin;
   volatile uint8_t _KeyCheckPin;
   uint8_t _irCode;
-  SoftwareSerial *ir;
 };
 
 #endif

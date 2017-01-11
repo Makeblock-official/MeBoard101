@@ -67,8 +67,8 @@
 // If you want key response faster, you can set DEBOUNCED_INTERVAL to a
 // smaller number.
 
-#define FALSE  (0)
-#define TRUE   (1)
+//#define FALSE  (0)
+//#define TRUE   (1)
 
 /**
  * Class: Me4Button

@@ -49,7 +49,7 @@
  * \param[in]
  *   None
  */
-MeInfraredReceiver::MeInfraredReceiver(void) : MePort(0)
+MeInfraredReceiver::MeInfraredReceiver(void) : MePort(0), SoftwareSerial(NC, NC)
 {
 }
 
@@ -59,11 +59,10 @@ MeInfraredReceiver::MeInfraredReceiver(void) : MePort(0)
  * \param[in]
  *   port - RJ25 port from PORT_1 to M2
  */
-MeInfraredReceiver::MeInfraredReceiver(uint8_t port) : MePort(port)
+MeInfraredReceiver::MeInfraredReceiver(uint8_t port) : MePort(port), SoftwareSerial(mePort[port].s2, mePort[port].s1)
 {
   _RxPin = s2;
   _KeyCheckPin = s1;
-  ir = new SoftwareSerial(_RxPin,_KeyCheckPin);
 }
 #else // ME_PORT_DEFINED
 /**
@@ -77,11 +76,10 @@ MeInfraredReceiver::MeInfraredReceiver(uint8_t port) : MePort(port)
  *   inverse_logic - Whether the Serial level need inv.
  */
 MeInfraredReceiver::MeInfraredReceiver(uint8_t receivePin, uint8_t keycheckpin, bool inverse_logic)\
-                        : MePort(0)
+:SoftwareSerial(receivePin, transmitPin, inverse_logic)
 {
   _RxPin = receivePin;
   _KeyCheckPin = keycheckpin;
-  ir = new SoftwareSerial(_RxPin,_KeyCheckPin);
 }
 #endif // ME_PORT_DEFINED
 
@@ -100,7 +98,7 @@ MeInfraredReceiver::MeInfraredReceiver(uint8_t receivePin, uint8_t keycheckpin, 
  */
 void MeInfraredReceiver::begin(void)
 {
-  ir->begin(9600);
+  SoftwareSerial::begin(9600);
 #ifdef ME_PORT_DEFINED
   pinMode(s1, INPUT);
 #else // ME_PORT_DEFINED
@@ -122,16 +120,17 @@ void MeInfraredReceiver::begin(void)
  * \par Others
  *   None
  */
-int16_t MeInfraredReceiver::read(void)
+int MeInfraredReceiver::read(void)
 {
   int16_t val;
   uint16_t i;
-  val = ir->read();     /* Read serial infrared data */
+  val = SoftwareSerial::read();     /* Read serial infrared data */
   val &= 0xff;
   return(val);
 }
-int16_t MeInfraredReceiver::available(void){
-  return ir->available();
+
+int MeInfraredReceiver::available(void){
+  return SoftwareSerial::available();
 }
 /**
  * \par Function
@@ -186,7 +185,7 @@ void MeInfraredReceiver::loop(void)
 {
   if(buttonState() == 1)
   { 
-    if(ir->available() > 0)
+    if(SoftwareSerial::available() > 0)
     {
       int r = read();
       if(r<0xff)
